@@ -64,7 +64,12 @@ wymagających gwarancji SLA czy licencjonowanych danych rynkowych.
   - [x] `03_gold` — SMA/EMA (20/50), dzienna zmiana %, rolling volatility (`workspace.gold.indicators`, 27590 wierszy) + macierz korelacji (`workspace.gold.correlations`, 484 pary = 22×22 tickerów)
   - [x] `04_export` — eksport `workspace.gold.indicators` i `workspace.gold.correlations` do S3 jako parquet (`gold/indicators/indicators.parquet`, `gold/correlations/correlations.parquet`), przez `boto3`/`put_object` (natywny zapis Sparka do S3 zablokowany na serverless — brak `fs.s3a` i External Location w Unity Catalog)
 - [x] Load do PostgreSQL — `src/load_to_postgres.py`, odczyt parquet z S3 (`boto3`/`get_object`) → `pandas` → `to_sql` do Neon (tabele `indicators`, `correlations`)
-- [ ] Dashboard Streamlit
+- [ ] Dashboard Streamlit — `dashboard/app.py`, dane z Neona (tabela `indicators`, cache'owane przez `st.cache_data`)
+  - [x] Połączenie z Postgresem + wczytanie `indicators`
+  - [x] Sidebar: wybór tickerów (multiselect) i zakresu dat
+  - [x] Wykres ceny (`close`) z SMA 20/50 dla wybranych tickerów (Plotly)
+  - [x] Top gainers / losers wg `daily_return_pct` (po wszystkich tickerach, w ramach wybranego zakresu dat)
+  - [ ] Rolling volatility (`volatility_20`)
 - [ ] Automatyzacja (GitHub Actions)
 
 ## Setup lokalny
