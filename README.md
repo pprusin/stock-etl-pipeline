@@ -69,7 +69,7 @@ wymagających gwarancji SLA czy licencjonowanych danych rynkowych.
   - [x] Sidebar: wybór tickerów (multiselect) i zakresu dat
   - [x] Wykres ceny (`close`) z SMA 20/50 dla wybranych tickerów (Plotly)
   - [x] Top gainers / losers wg `daily_return_pct` (po wszystkich tickerach, w ramach wybranego zakresu dat)
-  - [ ] Rolling volatility (`volatility_20`)
+  - [x] Rolling volatility (`volatility_20`)
 - [ ] Automatyzacja (GitHub Actions)
 
 ## Setup lokalny

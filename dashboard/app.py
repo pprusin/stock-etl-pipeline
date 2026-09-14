@@ -5,6 +5,7 @@ import plotly.graph_objects as go
 import streamlit as st
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
+from plotly.subplots import make_subplots
 
 load_dotenv()
 
@@ -50,12 +51,15 @@ st.subheader("Cena i średnie kroczące")
 for ticker in selected_tickers:
     ticker_df = filtered[filtered["ticker"] == ticker].sort_values("date")
 
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["close"], name="close"))
-    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["sma_20"], name="SMA 20"))
-    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["sma_50"], name="SMA 50"))
+    fig = make_subplots(rows=2, cols=1, shared_xaxes=True, row_heights=[0.7, 0.3], vertical_spacing=0.05)
+    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["close"], name="close"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["sma_20"], name="SMA 20"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["sma_50"], name="SMA 50"), row=1, col=1)
+    fig.add_trace(go.Scatter(x=ticker_df["date"], y=ticker_df["volatility_20"], name="volatility_20"), row=2, col=1)
 
-    fig.update_layout(title=ticker, xaxis_title="Data", yaxis_title="Cena")
+    fig.update_yaxes(title_text="Cena", row=1, col=1)
+    fig.update_yaxes(title_text="Volatility", row=2, col=1)
+    fig.update_xaxes(title_text="Data", row=2, col=1)
     st.plotly_chart(fig, use_container_width=True)
 
 st.subheader("Top gainers / losers")
