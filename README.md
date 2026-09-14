@@ -47,6 +47,23 @@ By default ~15-20 S&P 500 companies (easily extendable via the `TICKERS` variabl
 `.env`), daily OHLCV data (open, high, low, close, volume) covering the last ~5 years
 plus a daily incremental update.
 
+## Live demo
+
+🔗 [stock-etl-pipeline.streamlit.app](https://stock-etl-pipeline-dduvkozybgtxk7htncr5kp.streamlit.app/)
+
+### Glossary
+
+- **Close** – the closing price of the stock on a given trading day.
+- **SMA 20 / SMA 50** – Simple Moving Average: the average closing price over the last
+  20 / 50 trading days. Smooths out short-term noise to show the underlying trend; the
+  gap between the two is a common trend-direction signal.
+- **Volatility 20** – rolling standard deviation of daily returns over the last 20
+  trading days. Higher values mean bigger, more erratic price swings (more risk).
+- **Daily return (%)** – the percentage change in closing price versus the previous
+  trading day.
+- **Top gainers / losers** – the 5 tickers with the highest / lowest daily return (%)
+  on the most recent date in the selected range.
+
 ## Setup
 
 ### 1. Clone and install dependencies

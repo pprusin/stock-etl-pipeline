@@ -47,6 +47,24 @@ Domyślnie ~15-20 spółek z S&P 500 (łatwo rozszerzalne przez zmienną `TICKER
 dane dzienne OHLCV (open, high, low, close, volume) z historii ostatnich ~5 lat plus
 codzienny przyrost.
 
+## Wersja live
+
+🔗 [stock-etl-pipeline.streamlit.app](https://stock-etl-pipeline-dduvkozybgtxk7htncr5kp.streamlit.app/)
+
+### Słowniczek pojęć
+
+- **Close** – cena zamknięcia akcji w danym dniu sesyjnym.
+- **SMA 20 / SMA 50** – Simple Moving Average: średnia cena zamknięcia z ostatnich
+  20 / 50 dni sesyjnych. Wygładza krótkoterminowe wahania i pokazuje trend; różnica
+  między tymi dwiema liniami to popularny sygnał kierunku trendu.
+- **Volatility 20** – rolling odchylenie standardowe dziennych stóp zwrotu z ostatnich
+  20 dni sesyjnych. Im wyższa wartość, tym większe i bardziej nieregularne wahania
+  ceny (większe ryzyko).
+- **Daily return (%)** – procentowa zmiana ceny zamknięcia względem poprzedniego dnia
+  sesyjnego.
+- **Top gainers / losers** – 5 spółek z najwyższą / najniższą dzienną stopą zwrotu (%)
+  na najnowszą datę w wybranym zakresie.
+
 ## Setup
 
 ### 1. Klonowanie i instalacja zależności
