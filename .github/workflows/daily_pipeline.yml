@@ -31,11 +31,36 @@ jobs:
         run: python src/extract.py
 
       - name: Run Databricks ETL job (bronze -> silver -> gold -> export)
-        uses: databricks/run-notebook@main
-        with:
-          databricks-host: ${{ secrets.DATABRICKS_HOST }}
-          databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
-          existing-job-id: ${{ secrets.DATABRICKS_JOB_ID }}
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_JOB_ID: ${{ secrets.DATABRICKS_JOB_ID }}
+        run: |
+          set -euo pipefail
+
+          run_id=$(curl -sf -X POST "$DATABRICKS_HOST/api/2.1/jobs/run-now" \
+            -H "Authorization: Bearer $DATABRICKS_TOKEN" \
+            -H "Content-Type: application/json" \
+            -d "{\"job_id\": $DATABRICKS_JOB_ID}" | jq -r .run_id)
+          echo "Triggered Databricks run_id=$run_id"
+
+          while true; do
+            run_state=$(curl -sf -X GET "$DATABRICKS_HOST/api/2.1/jobs/runs/get?run_id=$run_id" \
+              -H "Authorization: Bearer $DATABRICKS_TOKEN")
+            life_cycle_state=$(echo "$run_state" | jq -r .state.life_cycle_state)
+            echo "life_cycle_state=$life_cycle_state"
+
+            if [[ "$life_cycle_state" == "TERMINATED" || "$life_cycle_state" == "SKIPPED" || "$life_cycle_state" == "INTERNAL_ERROR" ]]; then
+              result_state=$(echo "$run_state" | jq -r .state.result_state)
+              echo "result_state=$result_state"
+              if [[ "$result_state" != "SUCCESS" ]]; then
+                echo "Databricks job did not succeed, see run: $DATABRICKS_HOST/#job/$DATABRICKS_JOB_ID/run/$run_id"
+                exit 1
+              fi
+              break
+            fi
+            sleep 30
+          done
 
       - name: Load gold layer into Postgres
         env:
