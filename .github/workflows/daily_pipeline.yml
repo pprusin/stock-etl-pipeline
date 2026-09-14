@@ -1,0 +1,47 @@
+name: Daily Stock ETL Pipeline
+
+on:
+  schedule:
+    - cron: "0 6 * * *"   # 6:00 UTC codziennie
+  workflow_dispatch:        # pozwala odpalić ręcznie z zakładki Actions
+
+jobs:
+  run-pipeline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Extract data and upload to S3 (bronze)
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          TICKERS: ${{ secrets.TICKERS }}
+          PERIOD: ${{ secrets.PERIOD }}
+        run: python src/extract.py
+
+      - name: Run Databricks ETL job (bronze -> silver -> gold -> export)
+        uses: databricks/run-notebook@main
+        with:
+          databricks-host: ${{ secrets.DATABRICKS_HOST }}
+          databricks-token: ${{ secrets.DATABRICKS_TOKEN }}
+          existing-job-id: ${{ secrets.DATABRICKS_JOB_ID }}
+
+      - name: Load gold layer into Postgres
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python src/load_to_postgres.py
